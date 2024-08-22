@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.shinjaehun.ktorclientandroid.data.remote.AuthServiceImpl
 import com.shinjaehun.ktorclientandroid.data.remote.dto.PostRequest
 import com.shinjaehun.ktorclientandroid.data.remote.dto.SignInRequest
+import com.shinjaehun.ktorclientandroid.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.launch
@@ -25,52 +26,28 @@ class AuthViewModel @Inject constructor(
     private val httpClient: HttpClient
 ) : ViewModel() {
 
-    fun performSignIn(context: Context, email: String, password: String) {
+//    private val _email = mutableStateOf(String())
+//    val email: State<String> = _email
+//
+//    private val _password = mutableStateOf(String())
+//    val password: State<String> = _password
+
+    fun performSignIn(context: Context, email: String, password: String, onNavigate: (String)->Unit) {
         viewModelScope.launch {
             try {
                val client = AuthServiceImpl(httpClient)
-               client.signIn(SignInRequest(email=email, password=password))
+                when(val result = client.signIn(SignInRequest(email=email, password=password))){
+                    is Resource.Success -> {
+                        Log.i(TAG, "Successful response!")
+                        onNavigate("posts_screen")
+                    }
+                    else -> {
+                        Log.e(TAG, "Error: ${result.message}")
+                    }
+                }
             } catch (e: Exception) {
-                Log.e(TAG, "Error: $e.message")
+                Log.e(TAG, "ERROR: $e.message")
             }
         }
-
-        // 그니까 context는 이렇게 okhttp로 통신할 때 필요했던 걸까?
-//        val client = OkHttpClient()
-//
-//        val requestBody = FormBody.Builder()
-//            .add("email", email)
-//            .add("password", password)
-//            .build()
-//
-//        val request = Request.Builder()
-//            .url(API_SIGN_IN_URL)
-//            .post(requestBody)
-//            .build()
-//
-//        client.newCall(request).enqueue(object : Callback {
-//            override fun onFailure(call: Call, e: IOException) {
-//                // Handle network failure or API error
-//            }
-//
-//            override fun onResponse(call: Call, response: Response) {
-//                if (response.isSuccessful) {
-//                    val authToken = response.header("X-Session-Token")
-//                    val cookies = response.headers("Set-Cookie")
-//
-//                    saveAuthToken(context, authToken)
-//                    saveCookies(cookies)
-//
-//                    // execute on the main thread
-//                    requireActivity().runOnUiThread {
-//                        navigateUp()
-//                        sessionNavHostFragment.reset()
-//                    }
-//
-//                } else {
-//                    // Raise error
-//                }
-//            }
-//        })
     }
 }

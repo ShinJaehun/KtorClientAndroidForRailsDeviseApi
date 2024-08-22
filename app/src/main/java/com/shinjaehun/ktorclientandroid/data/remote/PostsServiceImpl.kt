@@ -1,7 +1,9 @@
 package com.shinjaehun.ktorclientandroid.data.remote
 
+import android.util.Log
 import com.shinjaehun.ktorclientandroid.data.remote.dto.PostRequest
 import com.shinjaehun.ktorclientandroid.data.remote.dto.PostResponse
+import com.shinjaehun.ktorclientandroid.util.Resource
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
@@ -15,58 +17,50 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
+private const val TAG = "PostsServiceImpl"
+
 class PostsServiceImpl(
     private val client: HttpClient
 ) : PostsService {
 
-    override suspend fun getPosts(): List<PostResponse> {
+    override suspend fun getPosts(): Resource<List<PostResponse>> {
         return try {
             val httpResponse = client.get {
                 url(HttpRoutes.POSTS)
             }
-            httpResponse.body()
+            Resource.Success(data = httpResponse.body())
         } catch(e: RedirectResponseException) {
             // 3xx -response
-            println("Error: ${e.response.status.description}")
-            emptyList()
+//            println("3xx Error: ${e.response.status.description}")
+            Resource.Error(message = e.message.toString())
         } catch(e: ClientRequestException) {
             // 4xx -response
-            println("Error: ${e.response.status.description}")
-            emptyList()
+//            println("4xx Error: ${e.response.status.description}")
+            Resource.Error(message = e.message.toString())
         } catch(e: ServerResponseException) {
             // 5xx -response
-            println("Error: ${e.response.status.description}")
-            emptyList()
+//            println("5xx Error: ${e.response.status.description}")
+            Resource.Error(message = e.message.toString())
         } catch (e: Exception) {
-            println("Error: ${e.message}")
-            emptyList()
+//            println("Error: ${e.message}")
+            Resource.Error(message = e.message.toString())
         }
-
     }
 
-    override suspend fun createPost(postRequest: PostRequest): PostResponse? {
+    override suspend fun createPost(postRequest: PostRequest): Resource<Unit> {
         return try {
             val httpResponse = client.post(HttpRoutes.POSTS) {
                 contentType(ContentType.Application.Json)
                 setBody(postRequest)
             }
-            httpResponse.body()
-        } catch(e: RedirectResponseException) {
-            // 3xx -response
-            println("Error: ${e.response.status.description}")
-            null
-        } catch(e: ClientRequestException) {
-            // 4xx -response
-            println("Error: ${e.response.status.description}")
-            null
-        } catch(e: ServerResponseException) {
-            // 5xx -response
-            println("Error: ${e.response.status.description}")
-            null
+            if (httpResponse.status.value in 200..299) {
+                Resource.Success(Unit)
+            } else {
+                Resource.Error(message = "http error: ${httpResponse.status.value}")
+            }
         } catch (e: Exception) {
-            println("Error: ${e.message}")
-            null
+//            Log.e(TAG, "Error: ${e.message}")
+            Resource.Error(message = "Error: ${e.message}")
         }
-
     }
 }

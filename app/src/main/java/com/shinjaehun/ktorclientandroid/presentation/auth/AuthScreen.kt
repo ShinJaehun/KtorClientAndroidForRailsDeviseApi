@@ -46,6 +46,8 @@ fun SignInForm(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    // viewModel.performSignIn() 이후에 TextField를 정리하기 위해
+    // viewModel로 넘기려고 했는데... TextField가 또 쌩뚱 맞게 동작한다...
 
     val context = LocalContext.current
 
@@ -75,8 +77,12 @@ fun SignInForm(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
-                viewModel.performSignIn(context, email, password)
-                onNavigate("posts_screen")
+                viewModel.performSignIn(context, email, password, onNavigate)
+                // onNavigate("posts_screen")
+                // 음... 이렇게 하면 로그인 실패해도 posts show 합니다. 바보 븅시나
+                email = ""
+                password = ""
+                // 그냥 이렇게만 해도 clear되기는 함...
             },
             modifier = Modifier.align(Alignment.End)
         ) {

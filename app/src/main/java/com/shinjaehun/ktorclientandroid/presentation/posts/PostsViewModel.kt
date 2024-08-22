@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shinjaehun.ktorclientandroid.data.remote.PostsServiceImpl
+import com.shinjaehun.ktorclientandroid.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.launch
@@ -26,19 +27,35 @@ class PostsViewModel @Inject constructor(
         getPosts()
     }
 
-    fun getPosts() {
+    private fun getPosts() {
         viewModelScope.launch {
             try {
                 val client = PostsServiceImpl(client=httpClient)
 
                 _state.value = state.value.copy(isLoading = true)
-                _state.value = state.value.copy(
-                    postResponse = client.getPosts(),
-                    isLoading = false
-                )
-//                Log.i(TAG, "response: ${_state.value.postResponse}")
+
+                when(val result = client.getPosts()){
+                    is Resource.Error -> {
+                        Log.e(TAG, "Error: ${result.message}")
+                        _state.value = state.value.copy(isLoading = false)
+                    }
+                    is Resource.Loading -> {
+                        _state.value = state.value.copy(
+                            isLoading = true,
+                        )
+                    }
+                    is Resource.Success -> {
+                        Log.i(TAG, "Successful response!")
+                        result.data?.let {
+                            _state.value = state.value.copy(
+                                postResponse = it,
+                                isLoading = false,
+                            )
+                        }
+                    }
+                }
             } catch (e: Exception) {
-                Log.e(TAG, "error: $e")
+                Log.e(TAG, "ERROR: ${e.message}")
                 _state.value = state.value.copy(isLoading = false)
             }
         }
