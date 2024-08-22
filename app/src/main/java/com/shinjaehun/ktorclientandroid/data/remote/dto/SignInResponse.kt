@@ -1,11 +1,13 @@
 package com.shinjaehun.ktorclientandroid.data.remote.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-// 일단 필요 없음
-//@Serializable
-//data class SignInResponse(
-//    val token: String,
-//    val refreshToken: String,
-//    val resourceOwner:  Map<String, String>,
-//)
+@Serializable
+data class SignInResponse(
+    val token: String,
+    @SerialName("refresh_token")
+    val refreshToken: String,
+    @SerialName("resource_owner")
+    val resourceOwner:  Map<String, String>,
+)

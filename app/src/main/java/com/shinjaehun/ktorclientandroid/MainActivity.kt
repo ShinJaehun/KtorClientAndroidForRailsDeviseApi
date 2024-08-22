@@ -67,8 +67,18 @@ class MainActivity : ComponentActivity() {
                     composable("auth_screen") {
                         AuthScreen(onNavigate = navController::navigate)
                     }
-                    composable("posts_screen") {
-                        PostsScreen()
+                    composable(
+                        route="posts_screen/{login_user}",
+                        arguments = listOf(
+                            navArgument("login_user"){
+                                type=NavType.StringType
+                            }
+                        )
+                    ) { backStackEntry ->
+                        val id = backStackEntry.arguments?.getString("login_user")
+                        id?.let {
+                            PostsScreen(it)
+                        }
                     }
                 }
             }

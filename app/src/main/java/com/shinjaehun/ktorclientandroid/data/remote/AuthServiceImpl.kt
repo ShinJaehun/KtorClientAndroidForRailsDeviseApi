@@ -2,6 +2,7 @@ package com.shinjaehun.ktorclientandroid.data.remote
 
 import android.util.Log
 import com.shinjaehun.ktorclientandroid.data.remote.dto.SignInRequest
+import com.shinjaehun.ktorclientandroid.data.remote.dto.SignInResponse
 import com.shinjaehun.ktorclientandroid.util.Resource
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -18,7 +19,7 @@ class AuthServiceImpl(
     private val client: HttpClient,
 ): AuthService {
 
-    override suspend fun signIn(signInRequest: SignInRequest): Resource<Unit> {
+    override suspend fun signIn(signInRequest: SignInRequest): Resource<String> {
         return try {
             val httpResponse = client.post(HttpRoutes.SIGN_IN) {
                 contentType(ContentType.Application.Json)
@@ -26,7 +27,12 @@ class AuthServiceImpl(
             }
             if (httpResponse.status.value in 200..299) {
 //                Log.i(TAG, "Successful response!")
-                Resource.Success(Unit)
+//                Log.i(TAG, "body: ${httpResponse.bodyAsText()}")
+                Log.i(TAG, "body: ${httpResponse.body<SignInResponse>()}")
+                // 야 이렇게 하니까 받아 온다 야!!!
+                Log.i(TAG, "id: ${httpResponse.body<SignInResponse>().resourceOwner["id"]}")
+                Resource.Success(httpResponse.body<SignInResponse>().resourceOwner["id"])
+
             } else {
 //                Log.e(TAG, "http error: ${httpResponse.status.value}")
                 Resource.Error(message = "http error: ${httpResponse.status.value}")

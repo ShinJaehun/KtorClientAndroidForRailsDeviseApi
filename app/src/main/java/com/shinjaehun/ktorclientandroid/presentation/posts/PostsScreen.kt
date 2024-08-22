@@ -38,9 +38,10 @@ private const val TAG = "PostsScreen"
 
 @Composable
 fun PostsScreen(
+    loginUserId: String,
     viewModel: PostsViewModel = hiltViewModel()
 ) {
-
+    Log.i(TAG, "loginUserId: $loginUserId")
     // 아... 이렇게 까지 할 일이 아니었는데
     // 내가 너무너무너무 꼬아서 생각해버렸다...ㅠㅠ
 //    LaunchedEffect(key1 = true) {
@@ -79,6 +80,7 @@ fun PostsScreen(
                     containerColor = Color.Cyan,
                     shape = CircleShape,
                     onClick = {
+                        viewModel.CreatePost(loginUserId)
                     }
                 ) {
                     Icon(Icons.Filled.Add, "post")

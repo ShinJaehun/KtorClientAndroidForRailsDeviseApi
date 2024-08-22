@@ -6,6 +6,6 @@ import com.shinjaehun.ktorclientandroid.util.Resource
 
 interface AuthService {
 
-    suspend fun signIn(signInRequest: SignInRequest): Resource<Unit>
+    suspend fun signIn(signInRequest: SignInRequest): Resource<String>
 
 }

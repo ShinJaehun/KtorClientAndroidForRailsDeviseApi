@@ -39,7 +39,8 @@ class AuthViewModel @Inject constructor(
                 when(val result = client.signIn(SignInRequest(email=email, password=password))){
                     is Resource.Success -> {
                         Log.i(TAG, "Successful response!")
-                        onNavigate("posts_screen")
+                        Log.i(TAG, "login user id: ${result.data}")
+                        onNavigate("posts_screen/${result.data}")
                     }
                     else -> {
                         Log.e(TAG, "Error: ${result.message}")
